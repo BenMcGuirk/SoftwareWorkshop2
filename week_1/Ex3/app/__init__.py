@@ -1,3 +1,8 @@
+"""
+Write an app that uses a dynamic route ending with a positive integer and generates a 
+page that shows the prime divisors of the integer (which may be just 1 and the integer 
+itself if it is prime). You can use code from the web for primality testing.
+"""
 from flask import Flask
 from .routes import main_bp
 
