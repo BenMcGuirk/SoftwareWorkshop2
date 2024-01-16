@@ -1,3 +1,7 @@
+"""
+Exercise 2:
+Show a random quote from a list of quotes.
+"""
 from flask import Flask
 from .routes import main_bp
 

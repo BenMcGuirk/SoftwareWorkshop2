@@ -1,2 +1,0 @@
-Exercise 2:
-Show a random quote from a list of quotes.
