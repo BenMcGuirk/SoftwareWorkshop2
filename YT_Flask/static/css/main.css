@@ -1,4 +1,22 @@
 body {
     margin: 0;
     font-family: sans-serif;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #333;
+    background-color: #fff;
+    text-align: center;
+}
+
+.content {
+    padding: 20px;
+}
+
+table {
+    table-layout: fixed;
+    margin: auto;
+    width: 50%;
+    border: 1px solid #ddd;
+    position: relative;
+    margin-bottom: 20px;
 }
