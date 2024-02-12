@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prime Divisors</title>
+</head>
+<body>
+    <h1>Prime Divisors of {{ number }}</h1>
+    <p>
+        {% if prime_divisors %}
+            Prime divisors: {{ prime_divisors|join(', ') }}
+        {% else %}
+            {{ number }} is a prime number, so it has only 1 and itself as divisors.
+        {% endif %}
+    </p>
+</body>
+</html>
