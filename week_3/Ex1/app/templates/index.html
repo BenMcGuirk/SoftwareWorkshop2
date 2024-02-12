@@ -6,5 +6,31 @@
 
 {% block content %}
 <h2>Home Page</h2>
+<div class="container">
+    <form action="post">
+        <label for="username">Username</label>
+        <input type="text" name="username" placeholder="Enter your username">
+        <br>
+
+        <label for="emailaddress">Email</label>
+        <input type="text" name="emailaddress">
+        <br>
+
+        <label for="password">Password</label>
+        <input type="text" name="password">
+        <br>
+
+        <label for="dob">Date Of Birth</label>
+        <input type="text" name="dob">
+        <br>
+
+        <label for="verifypassword">Verify password</label>
+        <input type="text" name="verifypassword" required onkeyup="checkPasswordMatch();">
+        <span id="passwordMatch"></span>
+        <br>
+
+        <input type="submit" value="Submit">
+    </form>
+</div>
 {% endblock %}
 ```
