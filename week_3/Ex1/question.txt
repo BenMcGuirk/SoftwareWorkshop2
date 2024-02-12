@@ -1,0 +1,3 @@
+Write an app that adds a Registration form to allow people to sign up. Fields should 
+include a username, an emailaddress, and 2 password fields to verify that the password 
+is entered correctly.

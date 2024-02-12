@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Week2:Ex4</title>
+{% endblock %}
+
+{% block content %}
+<h1>Abbreviation Search</h1>
+    <form action="/search" method="post">
+        <label for="query">Enter a value:</label>
+        <input type="text" id="query" name="query" required>
+        <button type="submit">Search</button>
+{% endblock %}
+```
