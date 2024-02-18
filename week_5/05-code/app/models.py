@@ -1,4 +1,5 @@
 from app import db
+
 class Student(db.Model):
     __tablename__ = 'students'
     student_id = db.Column(db.Integer, primary_key=True)
@@ -9,8 +10,8 @@ class Student(db.Model):
     loans = db.relationship('Loan', backref='student', lazy='dynamic')
 
     def __repr__(self):
-        return f"student('{self.username}', '{self.firstname}', '{self.lastname}', '{self.email}')"
-    
+        return f"student('{self.username}', '{self.lastname}', '{self.firstname}' , '{self.email}')"
+
 class Loan(db.Model):
     __tablename__ = 'loans'
     loan_id = db.Column(db.Integer, primary_key=True)
@@ -20,5 +21,6 @@ class Loan(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey('students.student_id'), nullable=False)
 
     def __repr__(self):
-        return f"loan('{self.device_id}', '{self.borrowdatetime}', '{self.returndatetime}', '{self.student_id}')"
-    
+        return f"loan('{self.device_id}', '{self.borrowdatetime}' , '{self.returndatetime}', '{self.student}')"
+
+

@@ -2,17 +2,18 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from app import views
-from app import models
 
 app = Flask(__name__)
-app.config['Secret key'] = '487564sfdljgsfkgjw4o0'
+app.config['SECRET_KEY'] =  b'WR#&f&+%78er0we=%799eww+#7^90-;s'
 
-# Database
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'data', 'data.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+
+from app import views
+from app.models import *
 
 @app.shell_context_processor
 def make_shell_context():
