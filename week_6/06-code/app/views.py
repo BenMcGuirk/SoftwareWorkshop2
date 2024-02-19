@@ -1,9 +1,8 @@
 from flask import render_template, redirect, url_for, flash
 from app import app, db
 from datetime import datetime
-from app.forms import LoginForm, RegistrationForm, AddStudentForm, BorrowDeviceForm
+from app.forms import LoginForm, RegistrationForm, AddStudentForm, BorrowForm
 from app.models import Student, Loan
-
 
 
 @app.route('/')
@@ -11,10 +10,12 @@ from app.models import Student, Loan
 def index():
     return render_template('index.html')
 
+
 @app.route('/datetime')
 def date_time():
     now = datetime.now()
     return render_template('datetime.html', title='Date & Time', now=now)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -32,6 +33,7 @@ def register():
         flash(f'Registration for {form.username.data} received', 'success')
         return redirect(url_for('index'))
     return render_template('registration.html', title='Register', form=form)
+
 
 @app.route('/add_student', methods=['GET', 'POST'])
 def add_student():
@@ -52,20 +54,22 @@ def add_student():
                 form.email.errors.append('This email address is already registered. Please choose another')
     return render_template('add_student.html', title='Add Student', form=form)
 
-@app.route('/borrow_device', methods=['GET', 'POST'])
-def borrow_device():
-    form = BorrowDeviceForm()
+
+@app.route('/borrow', methods=['GET', 'POST'])
+def borrow():
+    form = BorrowForm()
     if form.validate_on_submit():
-        new_loan = Loan(device_id=form.device_id.data, borrowdatetime=datetime.now(), student_id=form.student_id.data)
+        new_loan = Loan(device_id=form.device_id.data,
+                        student_id=form.student_id.data,
+                        borrowdatetime=datetime.now())
+
         db.session.add(new_loan)
         try:
             db.session.commit()
-            flash(f'Device borrowed by student: {form.student_id.data}', 'success')
+            flash(f'New Loan added', 'success')
             return redirect(url_for('index'))
         except:
             db.session.rollback()
-            if Student.has_active_loan(form.student_id.data):
-                form.student_id.errors.append('This student has an active loan. Please return the device before borrowing again')
-            if Loan.query.filter_by(device_id=form.device_id.data, returndatetime=None).first():
-                form.device_id.errors.append('This device is already on loan. Please choose another')
-    return render_template('borrow_device.html', title='Borrow Device')
+    return render_template('borrow.html', title='Borrow', form=form)
+
+
