@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, flash
 from app import app, db
 from datetime import datetime
-from app.forms import LoginForm, RegistrationForm, AddStudentForm, BorrowDeviceForm, ReturnDeviceForm, RemoveStudentForm
+from app.forms import LoginForm, RegistrationForm, AddStudentForm, BorrowDeviceForm, ReturnDeviceForm
 from app.models import Student, Loan
 
 
@@ -87,17 +87,3 @@ def return_device():
             if not Student.has_active_loan(form.student_id.data):
                 form.student_id.errors.append('This student does not have an active loan. Please check the student id')
     return render_template('return_device.html', title='Return Device', form=form)
-
-@app.route('/remove_student', methods=['GET', 'POST'])
-def remove_student():
-    form = RemoveStudentForm()
-    if form.validate_on_submit():
-        student = Student.query.filter_by(student_id=form.student_id.data).first()
-        if student:
-            db.session.delete(student)
-            db.session.commit()
-            flash(f'Student {form.student_id.data} removed', 'success')
-            return redirect(url_for('index'))
-        else:
-            form.student_id.errors.append('This student does not exist. Please check the student id')
-    return render_template('remove_student.html', title='Remove Student', form=form)
