@@ -18,7 +18,3 @@ from app.models import *
 @app.shell_context_processor
 def make_shell_context():
     return dict(db=db, Student=Student, Loan=Loan, datetime=datetime)
-
-# to initialize the database, run the following commands in the terminal
-# Flask shell
-# db.create_all()
