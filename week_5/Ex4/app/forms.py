@@ -31,3 +31,8 @@ class ReturnDeviceForm(FlaskForm):
 class RemoveStudentForm(FlaskForm):
     student_id = StringField('Student ID', validators=[DataRequired()])
     submit = SubmitField('Remove Student')
+
+class ShowReportForm(FlaskForm):
+    student_id = StringField('Student ID')
+    device_id = StringField('Device ID')
+    submit = SubmitField('Show Report')

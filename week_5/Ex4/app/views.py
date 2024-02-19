@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, flash
 from app import app, db
 from datetime import datetime
-from app.forms import AddStudentForm, BorrowDeviceForm, ReturnDeviceForm, RemoveStudentForm
+from app.forms import AddStudentForm, BorrowDeviceForm, ReturnDeviceForm, RemoveStudentForm, ShowReportForm
 from app.models import Student, Loan
 
 @app.route('/')
@@ -83,3 +83,17 @@ def remove_student():
         else:
             form.student_id.errors.append('This student does not exist. Please check the student id')
     return render_template('remove_student.html', title='Remove Student', form=form)
+
+@app.route('/show_report', methods=['GET', 'POST'])
+def show_report():
+    form = ShowReportForm()
+    results = []
+    if form.validate_on_submit():
+        if form.student_id.data:
+            results = Loan.query.filter_by(student_id=form.student_id.data).all()
+        elif form.device_id.data:
+            results = Loan.query.filter_by(device_id=form.device_id.data).all()
+        else:
+            results = Loan.query.all()
+    
+    return render_template('show_report.html', title='Show Report', form=form, loans=results)
