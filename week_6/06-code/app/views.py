@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, flash
 from app import app, db
 from datetime import datetime
-from app.forms import LoginForm, RegistrationForm, AddStudentForm, BorrowForm
+from app.forms import LoginForm, RegistrationForm, AddStudentForm, BorrowForm, DeactivateStudentForm
 from app.models import Student, Loan
 
 
@@ -73,3 +73,25 @@ def borrow():
     return render_template('borrow.html', title='Borrow', form=form)
 
 
+@app.route('/student_list')
+def student_list():
+    #display students with id_number
+    students = Student.query.all()
+    return render_template('student_list.html', title='Student List', students=students)
+
+@app.route('/deactivate', methods=['GET', 'POST'])
+def deactivateStudent():
+    form = DeactivateStudentForm()
+    if form.validate_on_submit():
+        update = Student.query.filter_by(student_id=form.student_id.data).first()
+        update.active = False
+        db.session.add(update)
+        try:
+            db.session.commit()
+            flash(f'Student {form.student_id.data} deactivated')
+            return redirect(url_for('index'))
+        except:
+            db.session.rollback()
+            if Student.query.filter_by(stu=form.username.data).first():
+                form.username.errors.append('This username is already taken. Please choose another')
+    return render_template('deactivate_student.html', title='Deactivate Student', form=form)

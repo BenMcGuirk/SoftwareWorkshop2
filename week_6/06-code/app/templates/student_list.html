@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div>
+    {% for student in students %}
+            <p>[{{student.student_id, student, student.active}}]</p>
+        {% endfor %}
+</div>
+
+{% endblock %}

@@ -62,3 +62,17 @@ class BorrowForm(FlaskForm):
                     (Loan.returndatetime.is_(None))
                 ).first():
             raise ValidationError('This device cannot be borrowed as it is currently on loan')
+    
+    def validate_active_status(self, student_id):
+        student = Student.query.get(student_id.data)
+        if student.active == False:
+            raise ValidationError('Student cannot borrow')
+
+        
+class DeactivateStudentForm(FlaskForm):
+    student_id = StringField('Student ID', validators=[DataRequired()])
+    submit = SubmitField('Deactivate student')
+
+    def validate_deactivate_student(self, student_id):
+        if not Student.query.get(student_id.data):
+            raise ValidationError('There is no student with this id in the system')

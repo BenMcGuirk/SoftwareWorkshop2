@@ -9,6 +9,7 @@ class Student(db.Model):
     lastname = db.Column(db.String(32), nullable=False, index=True)
     email = db.Column(db.String(64), nullable=False, unique=True, index=True)
     loans = db.relationship('Loan', backref='student', lazy='dynamic')
+    active = db.Column(db.Boolean, nullable=False, default=True)
 
     def __repr__(self):
         return f"student('{self.username}', '{self.lastname}', '{self.firstname}' , '{self.email}')"
