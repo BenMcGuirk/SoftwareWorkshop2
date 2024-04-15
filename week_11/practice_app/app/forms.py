@@ -17,3 +17,10 @@ class RegistrationForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     confirmpassword = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Register')
+
+class ToggleActiveForm(FlaskForm):
+    submit = SubmitField('Toggle Active')
+
+class UploadStudentsForm(FlaskForm):
+    student_file = FileField('New Students File', validators=[FileAllowed(['csv'])])
+    submit = SubmitField('Upload')

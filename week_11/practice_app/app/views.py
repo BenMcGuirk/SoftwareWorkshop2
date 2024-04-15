@@ -1,6 +1,6 @@
 from flask import render_template, redirect, url_for, flash, request
 from app import app, db
-from app.forms import (LoginForm, RegistrationForm)
+from app.forms import (LoginForm, RegistrationForm, ToggleActiveForm)
 from app.models import User
 from flask_login import current_user, login_user, logout_user, login_required
 from urllib.parse import urlsplit
@@ -49,7 +49,8 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         new_user = User(username=form.username.data, email=form.email.data,
-                        password_hash=generate_password_hash(form.password.data, salt_length=32))
+                        password_hash=generate_password_hash(form.password.data, salt_length=32),
+                        active=True)
         db.session.add(new_user)
         try:
             db.session.commit()
@@ -80,6 +81,74 @@ def silent_remove(filepath):
     except:
         pass
     return
+
+@app.route('/listStudents', methods=['GET', 'POST'])
+def listStudents():
+    form = ToggleActiveForm()
+    users = users.query.all()
+    if form.validate_on_submit():
+        toggleActive = request.values.get('toggleActive')
+        if toggleActive:
+            user = users.query.get(toggleActive)
+            user.active = not user.active
+            db.session.commit()
+        return redirect(url_for('listStudents'))
+    return render_template('list_students.html', title='List Students', users=users, form=form)
+
+@app.route('/uploadStudents', methods=['GET', 'POST'])
+@login_required
+def upload_students():
+    form = UploadStudentsForm()
+    if form.validate_on_submit():
+        if form.student_file.data:
+            unique_str = str(uuid4())
+            filename = secure_filename(f'{unique_str}-{form.student_file.data.filename}')
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            form.student_file.data.save(filepath)
+            try:
+                with open(filepath, newline='') as csvfile:
+                    reader = csv.reader(csvfile)
+                    error_count = 0
+                    row = next(reader)
+                    if row != ['Username', 'Email', 'Firstname', 'Lastname']:
+                        form.student_file.errors.append(
+                            'First row of file must be a Header row containing "Username,Email,Firstname,Lastname"')
+                        raise ValueError()
+                    for idx, row in enumerate(reader):
+                        row_num = idx+2 # Spreadsheets have the first row as 0, and we skip the header
+                        if error_count > 10:
+                            form.student_file.errors.append('Too many errors found, any further errors omitted')
+                            raise ValueError()
+                        if len(row) != 4:
+                            form.student_file.errors.append(f'Row {row_num} does not have precisely 4 fields')
+                            error_count += 1
+                        if Student.query.filter_by(username=row[0]).first():
+                            form.student_file.errors.append(
+                                f'Row {row_num} has username {row[0]}, which is already in use')
+                            error_count += 1
+                        if not is_valid_email(row[1]):
+                            form.student_file.errors.append(f'Row {row_num} has an invalid email: "{row[1]}"')
+                            error_count += 1
+                        if Student.query.filter_by(email=row[1]).first():
+                            form.student_file.errors.append(
+                                f'Row {row_num} has email {row[1]}, which is already in use')
+                            error_count += 1
+                        if error_count == 0:
+                            student = Student(username=row[0], email=row[1], firstname=row[2], lastname=row[3])
+                            db.session.add(student)
+                if error_count > 0:
+                    raise ValueError
+                db.session.commit()
+                flash(f'New Students Uploaded', 'success')
+
+                return redirect(url_for('index'))
+            except:
+                flash(f'New students upload failed: '
+                      'please try again', 'danger')
+                db.session.rollback()
+            finally:
+                silent_remove(filepath)
+    return render_template('upload_students.html', title='Upload Students', form=form)
 
 
 # Handler for 413 Error: "RequestEntityTooLarge". This error is caused by a file upload

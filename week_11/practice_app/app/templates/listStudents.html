@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container m-3">
+    <form method="POST" action="" novalidate>
+        {{ form.hidden_tag() }}
+        <table id="data" class="table table-striped">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Password Hash</th>
+                <th>Active</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.user_id }}</td>
+                <td>{{ user.username}}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.password_hash }}</td>
+                <td>{{ user.active }}</td>
+                <td>
+                    <button type="submit" name="toggleActive" value="{{ user.user_id }}">
+                        Toggle Active
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
+</div>
+{% endblock %}

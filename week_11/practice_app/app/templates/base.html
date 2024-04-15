@@ -23,6 +23,8 @@
             <div class="collapse navbar-collapse" id="navbarToggle">
                 <div class="navbar-nav me-auto">
                     <a class="nav-item nav-link" href="{{ url_for('index') }}">Home</a>
+                    <a class="nav-item nav-link" href="{{ url_for('listStudents') }}">List Students</a>
+                    <a class="nav-item nav-link" href="{{ url_for('uploadStudents') }}">Upload Students</a>
                 </div>
                 <div class="navbar-nav">
                     {% if current_user.is_anonymous %}

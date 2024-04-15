@@ -69,8 +69,19 @@ def logout():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        flash(f'Registration for {form.username.data} received', 'success')
-        return redirect(url_for('index'))
+        user = User(username=form.username.data, email=form.email.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        try:
+            db.session.commit()
+            flash(f'Registration for {form.username.data} received', 'success')
+            return redirect(url_for('index'))
+        except:
+            db.session.rollback()
+            if User.query.filter_by(username=form.username.data).first():
+                form.username.errors.append('This username is already taken. Please choose another')
+            if User.query.filter_by(email=form.email.data).first():
+                form.email.errors.append('This email address is already registered. Please choose another')
     return render_template('registration.html', title='Register', form=form)
 
 
@@ -80,7 +91,7 @@ def add_student():
     form = AddStudentForm()
     if form.validate_on_submit():
         new_student = Student(username=form.username.data, firstname=form.firstname.data,
-                              lastname=form.lastname.data, email=form.email.data)
+                              lastname=form.lastname.data, email=form.email.data, active=True)
         db.session.add(new_student)
         try:
             db.session.commit()
