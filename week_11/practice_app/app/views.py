@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, flash, request
 from app import app, db
 from datetime import datetime
 from app.forms import (LoginForm, RegistrationForm, AddStudentForm, BorrowForm,
-                       DeactivateStudentForm, UploadStudentsForm, ToggleActiveForm)
+                       DeactivateStudentForm, UploadStudentsForm, ToggleActiveForm, SearchStudentsForm)
 from app.models import Student, Loan, User
 from flask_login import current_user, login_user, logout_user, login_required
 from urllib.parse import urlsplit
@@ -177,6 +177,19 @@ def upload_students():
             finally:
                 silent_remove(filepath)
     return render_template('upload_students.html', title='Upload Students', form=form)
+
+@app.route('/search_students', methods=['GET', 'POST'])
+@login_required
+def search_students():
+    form = SearchStudentsForm()
+    list = []
+    if form.validate_on_submit():
+        search = form.search.data
+        list = Student.query.filter(Student.lastname.like(f'%{search}%')).all()
+        if not list:
+            flash(f'No students found with surname "{search}"', 'danger')
+            return redirect(url_for('search_students'))
+    return render_template('search_students.html', title='Search Students', students=list, form=form)
 
 
 @app.route('/borrow', methods=['GET', 'POST'])
