@@ -24,7 +24,10 @@
                 <div class="navbar-nav me-auto">
                     <a class="nav-item nav-link" href="{{ url_for('index') }}">Home</a>
                     <a class="nav-item nav-link" href="{{ url_for('listStudents') }}">List Students</a>
-                    <a class="nav-item nav-link" href="{{ url_for('uploadStudents') }}">Upload Students</a>
+                    <a class="nav-item nav-link" href="{{ url_for('add_student') }}">Add Student</a>
+                    <a class="nav-item nav-link" href="{{ url_for('upload_students') }}">Upload Students</a>
+                    <a class="nav-item nav-link" href="{{ url_for('borrow') }}">Borrow</a>
+                    <a class="nav-item nav-link" href="{{ url_for('deactivateStudent') }}">Deactivate</a>
                 </div>
                 <div class="navbar-nav">
                     {% if current_user.is_anonymous %}

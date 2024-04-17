@@ -1,13 +1,15 @@
 from flask import render_template, redirect, url_for, flash, request
 from app import app, db
-from app.forms import (LoginForm, RegistrationForm, ToggleActiveForm)
-from app.models import User
+from datetime import datetime
+from app.forms import (LoginForm, RegistrationForm, AddStudentForm, BorrowForm,
+                       DeactivateStudentForm, UploadStudentsForm, ToggleActiveForm)
+from app.models import Student, Loan, User
 from flask_login import current_user, login_user, logout_user, login_required
 from urllib.parse import urlsplit
 from uuid import uuid4
 from werkzeug.utils import secure_filename
-from werkzeug.security import generate_password_hash
 import os
+import csv
 from email_validator import validate_email, EmailNotValidError
 
 
@@ -15,6 +17,27 @@ from email_validator import validate_email, EmailNotValidError
 @app.route('/index')
 def index():
     return render_template('index.html')
+
+
+@app.route('/datetime')
+def date_time():
+    now = datetime.now()
+    return render_template('datetime.html', title='Date & Time', now=now)
+
+
+@app.route('/listStudents', methods=['GET', 'POST'])
+@login_required
+def listStudents():
+    form = ToggleActiveForm()
+    students = Student.query.all()
+    if form.validate_on_submit():
+        toggleActive = request.values.get('toggleActive')
+        if toggleActive:
+            student = Student.query.get(toggleActive)
+            student.active = not student.active
+            db.session.commit()
+        return redirect(url_for('listStudents'))
+    return render_template('listStudents.html', title='List Students', students=students, form=form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -44,26 +67,43 @@ def logout():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        new_user = User(username=form.username.data, email=form.email.data,
-                        password_hash=generate_password_hash(form.password.data, salt_length=32),
-                        active=True)
-        db.session.add(new_user)
+        user = User(username=form.username.data, email=form.email.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
         try:
             db.session.commit()
             flash(f'Registration for {form.username.data} received', 'success')
             return redirect(url_for('index'))
         except:
             db.session.rollback()
-            if User.query.filter_by(username=form.username.data):
+            if User.query.filter_by(username=form.username.data).first():
                 form.username.errors.append('This username is already taken. Please choose another')
-            if User.query.filter_by(email=form.email.data):
+            if User.query.filter_by(email=form.email.data).first():
                 form.email.errors.append('This email address is already registered. Please choose another')
-            flash(f'Registration failed', 'danger')
     return render_template('registration.html', title='Register', form=form)
+
+
+@app.route('/add_student', methods=['GET', 'POST'])
+@login_required
+def add_student():
+    form = AddStudentForm()
+    if form.validate_on_submit():
+        new_student = Student(username=form.username.data, firstname=form.firstname.data,
+                              lastname=form.lastname.data, email=form.email.data, active=True)
+        db.session.add(new_student)
+        try:
+            db.session.commit()
+            flash(f'New Student added: {form.username.data} received', 'success')
+            return redirect(url_for('index'))
+        except:
+            db.session.rollback()
+            if Student.query.filter_by(username=form.username.data).first():
+                form.username.errors.append('This username is already taken. Please choose another')
+            if Student.query.filter_by(email=form.email.data).first():
+                form.email.errors.append('This email address is already registered. Please choose another')
+    return render_template('add_student.html', title='Add Student', form=form)
 
 
 def is_valid_email(email):
@@ -82,20 +122,8 @@ def silent_remove(filepath):
         pass
     return
 
-@app.route('/listStudents', methods=['GET', 'POST'])
-def listStudents():
-    form = ToggleActiveForm()
-    users = users.query.all()
-    if form.validate_on_submit():
-        toggleActive = request.values.get('toggleActive')
-        if toggleActive:
-            user = users.query.get(toggleActive)
-            user.active = not user.active
-            db.session.commit()
-        return redirect(url_for('listStudents'))
-    return render_template('list_students.html', title='List Students', users=users, form=form)
 
-@app.route('/uploadStudents', methods=['GET', 'POST'])
+@app.route('/upload_students', methods=['GET', 'POST'])
 @login_required
 def upload_students():
     form = UploadStudentsForm()
@@ -149,6 +177,42 @@ def upload_students():
             finally:
                 silent_remove(filepath)
     return render_template('upload_students.html', title='Upload Students', form=form)
+
+
+@app.route('/borrow', methods=['GET', 'POST'])
+@login_required
+def borrow():
+    form = BorrowForm()
+    if form.validate_on_submit():
+        new_loan = Loan(device_id=form.device_id.data,
+                        student_id=form.student_id.data,
+                        borrowdatetime=datetime.now())
+
+        db.session.add(new_loan)
+        try:
+            db.session.commit()
+            flash(f'New Loan added', 'success')
+            return redirect(url_for('index'))
+        except:
+            db.session.rollback()
+    return render_template('borrow.html', title='Borrow', form=form)
+
+
+@app.route('/deactivate', methods=['GET', 'POST'])
+@login_required
+def deactivateStudent():
+    form = DeactivateStudentForm()
+    if form.validate_on_submit():
+        student = Student.query.get(form.student_id.data)
+        student.active = False
+        db.session.add(student)
+        try:
+            db.session.commit()
+            flash(f'student {student} deactivated', 'success')
+            return redirect(url_for('index'))
+        except:
+            db.session.rollback()
+    return render_template('deactivateStudent.html', title='Deactivate Student', form=form)
 
 
 # Handler for 413 Error: "RequestEntityTooLarge". This error is caused by a file upload
