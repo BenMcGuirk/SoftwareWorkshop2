@@ -40,6 +40,10 @@ class UploadStudentsForm(FlaskForm):
     student_file = FileField('New Students File', validators=[FileAllowed(['csv'])])
     submit = SubmitField('Upload')
 
+class UploadUsersForm(FlaskForm):
+    user_file = FileField('New Users File', validators=[FileAllowed(['csv'])])
+    submit = SubmitField('Upload')
+
 class SearchStudentsForm(FlaskForm):
     search = StringField('Enter surname', validators=[DataRequired()])
     submit = SubmitField('Search')

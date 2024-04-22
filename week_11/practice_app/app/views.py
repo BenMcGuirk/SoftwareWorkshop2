@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, flash, request
 from app import app, db
 from datetime import datetime
 from app.forms import (LoginForm, RegistrationForm, AddStudentForm, BorrowForm,
-                       DeactivateStudentForm, UploadStudentsForm, ToggleActiveForm, SearchStudentsForm, ToggleDamageForm)
+                       DeactivateStudentForm, UploadStudentsForm, ToggleActiveForm, SearchStudentsForm, ToggleDamageForm, UploadUsersForm)
 from app.models import Student, Loan, User
 from flask_login import current_user, login_user, logout_user, login_required
 from urllib.parse import urlsplit
@@ -191,6 +191,61 @@ def upload_students():
             finally:
                 silent_remove(filepath)
     return render_template('upload_students.html', title='Upload Students', form=form)
+
+@app.route('/uploadUsers', methods=['GET', 'POST'])
+@login_required
+def uploadUsers():
+    form = UploadUsersForm()
+    if form.validate_on_submit():
+        if form.user_file.data:
+            unique_strr = str(uuid4())
+            filename = secure_filename(f'{unique_strr}-{form.user_file.data.filename}')
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            form.user_file.data.save(filepath)
+            try:
+                with open(filepath, newline='') as csvfile:
+                    reader = csv.reader(csvfile)
+                    error_count = 0
+                    row = next(reader)
+                    if row != ['Username', 'Email']:
+                        form.user_file.errors.append(
+                            'First row of file must be a Header row containing "Username,Email,Password"')
+                        raise ValueError()
+                    for idx, row in enumerate(reader):
+                        row_num = idx+2 # Spreadsheets have the first row as 0, and we skip the header
+                        if error_count > 10:
+                            form.user_file.errors.append('Too many errors found, any further errors omitted')
+                            raise ValueError()
+                        if len(row) != 2:
+                            form.user_file.errors.append(f'Row {row_num} does not have precisely 3 fields')
+                            error_count += 1
+                        if User.query.filter_by(username=row[0]).first():
+                            form.user_file.errors.append(
+                                f'Row {row_num} has username {row[0]}, which is already in use')
+                            error_count += 1
+                        if not is_valid_email(row[1]):
+                            form.user_file.errors.append(f'Row {row_num} has an invalid email: "{row[1]}"')
+                            error_count += 1
+                        if User.query.filter_by(email=row[1]).first():
+                            form.user_file.errors.append(
+                                f'Row {row_num} has email {row[1]}, which is already in use')
+                            error_count += 1
+                        if error_count == 0:
+                            user = User(username=row[0], email=row[1])
+                            db.session.add(user)
+                if error_count > 0:
+                    raise ValueError
+                db.session.commit()
+                flash(f'New Users Uploaded', 'success')
+
+                return redirect(url_for('index'))
+            except:
+                flash(f'New users upload failed: '
+                      'please try again', 'danger')
+                db.session.rollback()
+            finally:
+                silent_remove(filepath)
+    return render_template('uploadUsers.html', title='Upload Users', form=form)
 
 @app.route('/search_students', methods=['GET', 'POST'])
 @login_required
