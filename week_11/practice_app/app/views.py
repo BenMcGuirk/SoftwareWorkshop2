@@ -207,7 +207,7 @@ def uploadUsers():
                     reader = csv.reader(csvfile)
                     error_count = 0
                     row = next(reader)
-                    if row != ['Username', 'Email']:
+                    if row != ['Username', 'Email', 'Password']:
                         form.user_file.errors.append(
                             'First row of file must be a Header row containing "Username,Email,Password"')
                         raise ValueError()
@@ -216,7 +216,7 @@ def uploadUsers():
                         if error_count > 10:
                             form.user_file.errors.append('Too many errors found, any further errors omitted')
                             raise ValueError()
-                        if len(row) != 2:
+                        if len(row) != 3:
                             form.user_file.errors.append(f'Row {row_num} does not have precisely 3 fields')
                             error_count += 1
                         if User.query.filter_by(username=row[0]).first():
@@ -232,6 +232,8 @@ def uploadUsers():
                             error_count += 1
                         if error_count == 0:
                             user = User(username=row[0], email=row[1])
+                            user.get_id()
+                            user.set_password(row[2])
                             db.session.add(user)
                 if error_count > 0:
                     raise ValueError
