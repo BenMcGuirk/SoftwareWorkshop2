@@ -48,8 +48,10 @@ class Loan(db.Model):
     borrowdatetime = db.Column(db.DateTime, nullable=False)
     returndatetime = db.Column(db.DateTime, nullable=True)
     student_id = db.Column(db.Integer, db.ForeignKey('students.student_id'), nullable=False)
+    damage = db.Column(db.Boolean, nullable=False, default=False)
+
 
     def __repr__(self):
-        return f"loan(loan_id='{self.loan_id}', device_id='{self.device_id}', borrowdatetime='{self.borrowdatetime}' , returndatetime='{self.returndatetime}', '{self.student}')"
+        return f"loan(loan_id='{self.loan_id}', device_id='{self.device_id}', borrowdatetime='{self.borrowdatetime}' , returndatetime='{self.returndatetime}', damage='{self.damage}', '{self.student}')"
 
 
