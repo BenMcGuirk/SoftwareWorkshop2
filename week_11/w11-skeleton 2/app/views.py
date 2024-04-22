@@ -87,8 +87,8 @@ def shopping():
         if BoughtItem:
             buying = ToBuy.query.get(BoughtItem)
             new_item = Bought(item=buying.item, user_id=buying.user_id)
-            ToBuy.query.delete(buying)
             db.session.add(new_item)
+            ToBuy.query.delete(buying)
             db.session.commit()
         return redirect(url_for('shopping'))
     return render_template('shopping.html', title='Shopping List', form=form, to_buy=to_buy, bought=bought, form2=form2)

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form method="POST" action="" novalidate>
+    {{ form.hidden_tag() }}
+    <div>
+        {{ form.item.label }}<br/>{{ form.item }}<br/>
+        {% for error in form.item.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </div>
+    <div>
+        {{ form.user_id.label }}<br/>{{ form.user_id }}<br/>
+        {% for error in form.user_id.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </div>
+
+    <div>{{ form.submit() }}</div>
+</form>
+<form>
+    {{ form2.hidden_tag() }}
+    <div>
+        <table id="data" class="table table-striped">
+            <h3>ToBuy</h3>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Item</th>
+                <th>User_ID</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in to_buy %}
+            <tr>
+                <td>{{ item.item_id }}</td>
+                <td>{{ item.item}}</td>
+                <td>{{ item.user_id }}</td>
+                <td>
+                        <button type="submit" name="Buy" value="{{ item.idem_id }}">
+                            Buy
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</form>
+    
+
+
+<table id="data" class="table table-striped">
+    <h3>Bought</h3>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Item</th>
+        <th>User_ID</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for item in bought %}
+    <tr>
+        <td>{{ item.item_id }}</td>
+        <td>{{ item.item}}</td>
+        <td>{{ item.user_id }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
