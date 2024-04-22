@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container m-3">
+    <form method="POST" action="" novalidate>
+        {{ form.hidden_tag() }}
+        <table id="data" class="table table-striped">
+            <thead>
+            <tr>
+                <th>Loan_ID</th>
+                <th>Device_ID</th>
+                <th>Borrow DateTime</th>
+                <th>Return DateTime</th>
+                <th>Student_id</th>
+                <th>Damage</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for loan in loans %}
+            <tr>
+                <td>{{ loan.loan_id }}</td>
+                <td>{{ loan.device_id}}</td>
+                <td>{{ loan.borrowdatetime }}</td>
+                <td>{{ loan.returndatetime }}</td>
+                <td>{{ loan.student_id }}</td>
+                <td>{{ loan.damage }}</td>
+                <td>
+                    <button type="submit" name="toggleDamage" value="{{ loan.loan_id }}">
+                        Toggle Damage
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
+</div>
+{% endblock %}
